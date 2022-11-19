@@ -55,6 +55,9 @@ vim.keymap.set('i', '"', '""<Esc>i')
 vim.keymap.set('n', '<Leader>t', ':TestNearest<CR>')
 vim.keymap.set('n', '<Leader>T', ':TestFile<CR>')
 vim.keymap.set('n', '<Leader>a', ':TestSuite<CR>')
+vim.keymap.set('n', '<C-s>', ':MarkdownPreview<CR>')
+vim.keymap.set('n', '<M-s>', ':MarkdownPreview<CR>')
+vim.keymap.set('n', '<C-p>', ':MarkdownPreviewToggle<CR>')
 
 local ensure_packer = function()
   local fn = vim.fn
@@ -132,7 +135,7 @@ require('packer').startup(function(use)
     config = function() require('gitsigns').setup() end
   }
   use 'matt-taggart/vim-js-debug'
-  -- use 'matt-taggart/replace-in-buffer'
+  use 'matt-taggart/replace-in-buffer'
   use {
     'wellle/targets.vim',
     event = 'VimEnter'
@@ -168,6 +171,10 @@ require('packer').startup(function(use)
   use { "hrsh7th/cmp-omni", after = "nvim-cmp" }
   use { "mattn/emmet-vim" }
   use { "lewis6991/impatient.nvim" }
+  use({
+      "iamcco/markdown-preview.nvim",
+      run = function() vim.fn["mkdp#util#install"]() end,
+  })
 
   -- use {"hrsh7th/cmp-cmdline", after = "nvim-cmp"}
   use {"quangnguyen30192/cmp-nvim-ultisnips", after = {'nvim-cmp', 'ultisnips'}}
@@ -191,5 +198,6 @@ require('packer').startup(function(use)
     require('packer').sync()
   end
 end)
+
 
 
