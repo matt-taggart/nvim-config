@@ -23,7 +23,7 @@ cmp.setup({
     { name = 'nvim_lsp' },
     { name = 'ultisnips' }, -- For ultisnips users.
   }, {
-    { name = 'buffer' },
+    { name = 'buffer', keyword_length = 5 },
   })
 })
 
@@ -53,4 +53,3 @@ cmp.setup.cmdline(':', {
     { name = 'cmdline' }
   })
 })
-)

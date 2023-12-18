@@ -40,3 +40,19 @@ require('lspconfig')['tsserver'].setup{
     on_attach = on_attach,
     flags = lsp_flags,
 }
+
+require('telescope').setup{ 
+  defaults = { 
+    file_ignore_patterns = { 
+      "node_modules" 
+    }
+  }
+}
+
+require('lspconfig').elixirls.setup {
+  cmd = { "elixir-ls" },
+  on_attach = on_attach,
+  capabilities = capabilities
+}
+
+

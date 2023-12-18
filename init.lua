@@ -15,7 +15,7 @@ set.clipboard = 'unnamedplus'
 set.smartindent = true
 set.autoindent = true
 
-api.nvim_create_user_command('FTermToggle', require('FTerm').toggle, { bang = true })
+-- api.nvim_create_user_command('FTermToggle', require('FTerm').toggle, { bang = true })
 
 vim.cmd [[
   colorscheme catppuccin
