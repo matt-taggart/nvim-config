@@ -55,4 +55,7 @@ require('lspconfig').elixirls.setup {
   capabilities = capabilities
 }
 
+require('colorbuddy').setup()
+
+require('colorbuddy').colorscheme('cobalt2')
 

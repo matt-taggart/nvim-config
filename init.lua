@@ -14,11 +14,12 @@ set.hlsearch = true
 set.clipboard = 'unnamedplus'
 set.smartindent = true
 set.autoindent = true
+set.termguicolors = true
 
--- api.nvim_create_user_command('FTermToggle', require('FTerm').toggle, { bang = true })
+api.nvim_create_user_command('FTermToggle', require('FTerm').toggle, { bang = true })
 
 vim.cmd [[
-  colorscheme catppuccin
+  colorscheme cobalt2
   let g:test#javascript#runner = "jest"
   let g:test#javascript#jest#file_pattern = '.*'
   let g:test#javascript#jest#executable = 'yarn test'
@@ -48,7 +49,7 @@ api.nvim_create_autocmd(
 
 vim.keymap.set('i', 'jk', '<Esc>')
 vim.keymap.set('n', '<Leader>w', ':w<CR>')
-vim.keymap.set('n', '<Leader>q', ':q<CR>')
+vim.keymap.set('n', '<Leader>q', ':qa!<CR>')
 vim.keymap.set('n', '<Leader>f', ':lua require\'telescope.builtin\'.find_files{}<CR>')
 vim.keymap.set('n', '<Leader>/', ':lua require\'telescope.builtin\'.live_grep{}<CR>')
 vim.keymap.set('n', '<Leader>s', ':lua require\'telescope.builtin\'.grep_string{}<CR>')
@@ -62,11 +63,6 @@ vim.keymap.set('n', '<Leader>C', ':BufOnly<CR>')
 vim.keymap.set('n', '<Leader>v', ':e ~/.config/nvim/init.lua<CR>')
 vim.keymap.set('n', '<Leader>r', ':ReplaceInBuffer<CR>')
 vim.keymap.set('n', '<Leader>jp', ':JSXPropComplete<CR>')
--- vim.keymap.set('i', '{', '{}<Esc>i')
--- vim.keymap.set('i', '(', '()<Esc>i')
--- vim.keymap.set('i', '[', '[]<Esc>i')
--- vim.keymap.set('i', '\'', '\'\'<Esc>i')
--- vim.keymap.set('i', '"', '""<Esc>i')
 vim.keymap.set('n', '<Leader>t', ':TestNearest<CR>')
 vim.keymap.set('n', '<Leader>T', ':TestFile<CR>')
 vim.keymap.set('n', '<Leader>a', ':TestSuite<CR>')
@@ -74,18 +70,21 @@ vim.keymap.set('n', '<C-s>', ':MarkdownPreview<CR>')
 vim.keymap.set('n', '<M-s>', ':MarkdownPreview<CR>')
 vim.keymap.set('n', '<C-p>', ':MarkdownPreviewToggle<CR>')
 
-local ensure_packer = function()
-  local fn = vim.fn
-  local install_path = fn.stdpath('data')..'/site/pack/packer/start/packer.nvim'
-  if fn.empty(fn.glob(install_path)) > 0 then
-    fn.system({'git', 'clone', '--depth', '1', 'https://github.com/wbthomason/packer.nvim', install_path})
-    vim.cmd [[packadd packer.nvim]]
-    return true
-  end
-  return false
+local fn = vim.fn
+local install_path = fn.stdpath("data") .. "/site/pack/packer/opt/packer.nvim"
+
+if fn.empty(fn.glob(install_path)) > 0 then
+	packer_bootstrap = fn.system({
+		"git",
+		"clone",
+		"--depth",
+		"1",
+		"https://github.com/wbthomason/packer.nvim",
+		install_path,
+	})
 end
 
-local packer_bootstrap = ensure_packer()
+vim.cmd("packadd packer.nvim")
 
 
 require('packer').startup(function(use)
@@ -100,36 +99,45 @@ require('packer').startup(function(use)
   }
   use 'mfussenegger/nvim-dap'
   use "nvim-lua/plenary.nvim"
-  -- use {
-  --   "jose-elias-alvarez/null-ls.nvim",
-  --   config = function()
-  --     require("null-ls").setup({
-  --         sources = {
-  --             require("null-ls").builtins.formatting.stylua,
-  --             require("null-ls").builtins.diagnostics.eslint,
-  --             require("null-ls").builtins.completion.spell,
-  --             require("null-ls").builtins.formatting.prettier,
-  --         },
-  --     })
-  --   end
-  -- }
+  use {
+    'stevearc/conform.nvim',
+    config = function()
+      require('conform').setup({
+        javascript = { { "prettierd", "prettier" }, "eslint_d" },
+        format_on_save = {
+          timeout_ms = 500,
+          lsp_fallback = true
+        }
+      })
+    end
+  }
   use "dracula/vim"
   use "EdenEast/nightfox.nvim"
   use "folke/tokyonight.nvim"
   use {
     'nvim-treesitter/nvim-treesitter',
-    run = function() require('nvim-treesitter.install').update({ with_sync = true }) end,
+    run = function()
+      require('nvim-treesitter.install').update({ with_sync = true })
+      require'nvim-treesitter.configs'.setup {
+        ensure_installed = {"erlang", "elixir", "heex", "eex"}, -- only install parsers for elixir and heex
+        -- ensure_installed = "all", -- install parsers for all supported languages
+        sync_install = false,
+        ignore_install = { },
+        highlight = {
+          enable = true,
+          disable = { },
+        },
+      }
+    end,
   }
   use 'tpope/vim-commentary'           
   use 'tpope/vim-fugitive'           
-  use 'tpope/vim-surround'
   use 'tpope/vim-repeat'
   use 'tpope/vim-vinegar'
   use 'tpope/vim-unimpaired'
+  use 'tpope/vim-surround'
   use 'jiangmiao/auto-pairs'
   use 'michaeljsmith/vim-indent-object'
-  use 'kana/vim-textobj-user'
-  use 'whatyouhide/vim-textobj-xmlattr'
   use 'christoomey/vim-tmux-navigator'
   use 'blindFS/vim-taskwarrior'
   use 'idanarye/vim-merginal'
@@ -139,8 +147,8 @@ require('packer').startup(function(use)
   use 'ggandor/lightspeed.nvim'
   use 'kevinhwang91/nvim-bqf'
   use 'prettier/vim-prettier'
-  use 'sirver/ultisnips'
   use 'vim-test/vim-test'
+  use 'chrisgrieser/nvim-various-textobjs'
   use {
     'feline-nvim/feline.nvim',
     config = function() require('feline').setup() end
@@ -170,7 +178,7 @@ require('packer').startup(function(use)
 
   -- nvim-cmp completion sources
   use { "hrsh7th/cmp-nvim-lsp", after = "nvim-cmp" }
-  -- use {"hrsh7th/cmp-nvim-lua", after = "nvim-cmp"}
+  use {"hrsh7th/cmp-nvim-lua", after = "nvim-cmp"}
   use { "hrsh7th/cmp-path", after = "nvim-cmp" }
   use { "hrsh7th/cmp-buffer", after = "nvim-cmp" }
   use { "hrsh7th/cmp-omni", after = "nvim-cmp" }
@@ -180,17 +188,54 @@ require('packer').startup(function(use)
   use { "AndrewRadev/tagalong.vim" }
   use { "xolox/vim-misc" }
   use { "xolox/vim-notes" }
-  use { "kana/vim-textobj-entire" }
-  use { "catppuccin/nvim", as = "catppuccin" }
+  use {
+    "catppuccin/nvim", 
+    as = "catppuccin" ,
+    config = function()
+      require('catppuccin').setup({
+        transparent_background = false, -- disables setting the background color.
+      })
+    end
+  }
+  use { "jparise/vim-graphql" }
+  use { "nvim-tree/nvim-web-devicons" }
+  use {
+    'glepnir/dashboard-nvim',
+    event = 'VimEnter',
+    config = function()
+      require('dashboard').setup {
+      }
+    end,
+    requires = {'nvim-tree/nvim-web-devicons'}
+  }
 
-  use({
-      "iamcco/markdown-preview.nvim",
-      run = function() vim.fn["mkdp#util#install"]() end,
-  })
+  use {
+    'folke/trouble.nvim',  
+    dependencies = { "nvim-tree/nvim-web-devicons" },
+    opts = {}
+  }
+
+  use {
+    'dmmulroy/tsc.nvim',
+    config = function()
+      require('tsc').setup()
+    end
+  }
+
+  use 'kana/vim-textobj-user'
+  use 'kana/vim-textobj-entire'
+
+  use {
+    'Kasama/nvim-custom-diagnostic-highlight',
+    config = function()
+      require('nvim-custom-diagnostic-highlight').setup {}
+    end
+  }
 
   use { "ms-jpq/coq_nvim", branch = "coq" }
   use { "ms-jpq/coq.artifacts", branch = "artifacts"  }
   use { "ms-jpq/coq.thirdparty", branch = "3p"  }
+  use { 'rcarriga/nvim-notify' }
 
   use {
     "https://gitlab.com/yorickpeterse/nvim-pqf.git",
@@ -199,57 +244,29 @@ require('packer').startup(function(use)
     end
   }
 
-  use { "nvim-tree/nvim-web-devicons" }
   use { "numToStr/FTerm.nvim" }
   use { "sindrets/diffview.nvim" }
-  use {
-    "sunjon/shade.nvim",
-    config = function()
-      require("shade").setup()
-    end
-  }
-  use({
-    "Pocco81/true-zen.nvim",
-    config = function()
-       require("true-zen").setup {
-        -- your config goes here
-        -- or just leave it empty :)
-       }
-    end,
-  })
+  -- use {
+  --   "sunjon/shade.nvim",
+  --   config = function()
+  --     require("shade").setup()
+  --   end
+  -- }
   use { "chentoast/marks.nvim",
     config = function() require('marks').setup() end
   }
 
-  -- use {"hrsh7th/cmp-cmdline", after = "nvim-cmp"}
-  use {"quangnguyen30192/cmp-nvim-ultisnips", after = {'nvim-cmp', 'ultisnips'}}
-  if vim.g.is_mac then
-    use {"hrsh7th/cmp-emoji", after = 'nvim-cmp'}
-  end
-
   use {
-    'glepnir/dashboard-nvim',
-    event = 'VimEnter',
-    config = function()
-      require('dashboard').setup {
-        -- config
-      }
-    end,
-    requires = {'nvim-tree/nvim-web-devicons'}
+    "elixir-tools/elixir-tools.nvim",
+    tag = "stable",
+    requires = { "nvim-lua/plenary.nvim" },
+    config = require("elixir").setup() 
   }
 
-  use {
-    'pwntester/octo.nvim',
-    requires = {
-      'nvim-lua/plenary.nvim',
-      'nvim-telescope/telescope.nvim',
-      'nvim-tree/nvim-web-devicons',
-    },
-    config = function ()
-      require"octo".setup()
-    end
-  }
-
+  use 'elixir-editors/vim-elixir'
+  use 'oxfist/night-owl.nvim'
+  use 'rafamadriz/neon'
+  use 'bluz71/vim-nightfly-colors'
 
   -- nvim-lsp configuration (it relies on cmp-nvim-lsp, so it should be loaded after cmp-nvim-lsp).
   use {
@@ -257,7 +274,51 @@ require('packer').startup(function(use)
     after = "cmp-nvim-lsp",
     config = function()
       require "nvim-lspconfig"
+      local capabilities = vim.lsp.protocol.make_client_capabilities()
+      capabilities = require('cmp_nvim_lsp').default_capabilities(capabilities)
+
+      require('mason').setup()
+      local mason_lspconfig = require 'mason-lspconfig'
+      mason_lspconfig.setup {
+          ensure_installed = { "pyright" }
+      }
+      require("lspconfig").pyright.setup {
+          capabilities = capabilities,
+      }
     end
+  }
+
+  use {
+    "zbirenbaum/copilot.lua",
+    cmd = "Copilot",
+    event = "InsertEnter",
+    config = function()
+      require("copilot").setup({})
+    end,
+  }
+
+  use {
+      "scottmckendry/cyberdream.nvim",
+      lazy = false,
+      priority = 1000,
+      config = function()
+          require("cyberdream").setup({
+              -- Recommended - see "Configuring" below for more config options
+              transparent = true,
+              italic_comments = true,
+              hide_fillchars = true,
+              borderless_telescope = true,
+          })
+      end,
+  }
+
+  use {
+    'tjdevries/colorbuddy.nvim'
+  }
+
+  use {
+      'lalitmee/cobalt2.nvim',
+      requires = 'tjdevries/colorbuddy.nvim'
   }
 
 
@@ -291,5 +352,6 @@ tnoremap <silent> <M-i> <C-\><C-n>:RnvimrResize<CR>
 nnoremap <silent> <M-o> :RnvimrToggle<CR>
 tnoremap <silent> <M-o> <C-\><C-n>:RnvimrToggle<CR>
 noremap <silent> <leader>to <C-\><C-n>:FTermToggle<CR>
-]]
+autocmd FileType javascript.jsx setlocal commentstring={/*\ %s\ */}
 
+]]
