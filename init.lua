@@ -5,7 +5,7 @@ vim.g.maplocalleader = " "
 -- Set to true if you have a Nerd Font installed
 vim.g.have_nerd_font = true
 
-vim.g.conceallevel = 1
+vim.g.conceallevel = 2
 
 -- [[ Setting options ]]
 -- See `:help vim.opt`
@@ -188,6 +188,8 @@ require("lazy").setup({
 	"michaeljsmith/vim-indent-object",
 	"jparise/vim-graphql",
 	"jiangmiao/auto-pairs",
+	"kana/vim-textobj-user",
+	{ "kana/vim-textobj-entire", dependencies = { "kana/vim-textobj-user" } },
 	{
 		"epwalsh/pomo.nvim",
 		version = "*", -- Recommended, use latest release instead of latest commit
@@ -225,6 +227,11 @@ require("lazy").setup({
 				-- see below for full list of options 👇
 			})
 		end,
+	},
+	{
+		"pmizio/typescript-tools.nvim",
+		dependencies = { "nvim-lua/plenary.nvim", "neovim/nvim-lspconfig" },
+		opts = {},
 	},
 	{
 		"yetone/avante.nvim",
@@ -274,7 +281,11 @@ require("lazy").setup({
 	},
 	{
 		"stevearc/oil.nvim",
-		opts = {},
+		opts = {
+			view_options = {
+				show_hidden = true,
+			},
+		},
 		-- Optional dependencies
 		dependencies = { "nvim-tree/nvim-web-devicons" },
 	},
@@ -282,14 +293,15 @@ require("lazy").setup({
 		"wellle/targets.vim",
 		event = "VimEnter",
 	},
-	{
-		"catppuccin/nvim",
-		name = "catppuccin",
-		priority = 1000,
-		init = function()
-			vim.cmd.colorscheme("catppuccin")
-		end,
-	},
+	-- {
+	-- 	"catppuccin/nvim",
+	-- 	name = "catppuccin",
+	-- 	priority = 1000,
+	-- 	init = function()
+	-- 		vim.cmd.colorscheme("catppuccin")
+	-- 	end,
+	-- },
+	"EdenEast/nightfox.nvim",
 	"windwp/nvim-ts-autotag",
 
 	{
@@ -355,14 +367,14 @@ require("lazy").setup({
 		event = "VeryLazy",
 		---@type Flash.Config
 		opts = {},
-  -- stylua: ignore
-    keys = {
-      { "s", mode = { "n", "x", "o" }, function() require("flash").jump() end, desc = "Flash" },
-      { "S", mode = { "n", "x", "o" }, function() require("flash").treesitter() end, desc = "Flash Treesitter" },
-      { "r", mode = "o", function() require("flash").remote() end, desc = "Remote Flash" },
-      { "R", mode = { "o", "x" }, function() require("flash").treesitter_search() end, desc = "Treesitter Search" },
-      { "<c-s>", mode = { "c" }, function() require("flash").toggle() end, desc = "Toggle Flash Search" },
-    },
+		-- stylua: ignore
+		keys = {
+			{ "s",     mode = { "n", "x", "o" }, function() require("flash").jump() end,              desc = "Flash" },
+			{ "S",     mode = { "n", "x", "o" }, function() require("flash").treesitter() end,        desc = "Flash Treesitter" },
+			{ "r",     mode = "o",               function() require("flash").remote() end,            desc = "Remote Flash" },
+			{ "R",     mode = { "o", "x" },      function() require("flash").treesitter_search() end, desc = "Treesitter Search" },
+			{ "<c-s>", mode = { "c" },           function() require("flash").toggle() end,            desc = "Toggle Flash Search" },
+		},
 	},
 
 	-- NOTE: Plugins can also be added by using a table,
@@ -497,7 +509,15 @@ require("lazy").setup({
 						},
 					},
 					defaults = {
-						file_ignore_patterns = { "node_modules/", "vendor/" },
+						file_ignore_patterns = {
+							"./node_modules/*",
+							"node_modules",
+							"^node_modules/*",
+							"node_modules/*",
+							"pnpm%-lock%.yaml",
+							"package%-lock%.json",
+							"vendor/",
+						},
 					},
 				}),
 			})
@@ -777,7 +797,7 @@ require("lazy").setup({
 		end,
 	},
 
-	{ -- Autoformat
+	{
 		"stevearc/conform.nvim",
 		lazy = false,
 		keys = {
@@ -793,9 +813,6 @@ require("lazy").setup({
 		opts = {
 			notify_on_error = false,
 			format_on_save = function(bufnr)
-				-- Disable "format_on_save lsp_fallback" for languages that don't
-				-- have a well standardized coding style. You can add additional
-				-- languages here or re-enable it for the disabled ones.
 				local disable_filetypes = { c = true, cpp = true }
 				return {
 					timeout_ms = 500,
@@ -804,16 +821,11 @@ require("lazy").setup({
 			end,
 			formatters_by_ft = {
 				lua = { "stylua" },
-				-- Conform can also run multiple formatters sequentially
-				-- python = { "isort", "black" },
-				--
-				-- You can use a sub-list to tell conform to run *until* a formatter
-				-- is found.
-				javascript = { "prettierd", "prettier", stop_after_first = true },
-				typescript = { "prettierd", "prettier", stop_after_first = true },
-				javascriptreact = { "prettierd", "prettier", stop_after_first = true },
-				typescriptreact = { "prettierd", "prettier", stop_after_first = true },
-				svelte = { "prettierd", "prettier", stop_after_first = true },
+				javascript = { "prettier" },
+				typescript = { "prettier" },
+				javascriptreact = { "prettier" },
+				typescriptreact = { "prettier" },
+				svelte = { "prettier" },
 				ocaml = { "ocamlformat" },
 				elixir = { "mix" },
 			},
@@ -970,52 +982,52 @@ require("lazy").setup({
 		"nvim-lualine/lualine.nvim",
 		dependencies = { "nvim-tree/nvim-web-devicons" },
 		config = function()
-			local C = require("catppuccin.palettes").get_palette("Frappe")
-			local O = require("catppuccin").options
-			local catppuccin = {}
-
-			local transparent_bg = O.transparent_background and "NONE" or C.mantle
-
-			catppuccin.normal = {
-				a = { bg = C.blue, fg = C.mantle, gui = "bold" },
-				b = { bg = C.surface0, fg = C.blue },
-				c = { bg = transparent_bg, fg = C.text },
-			}
-
-			catppuccin.insert = {
-				a = { bg = C.green, fg = C.base, gui = "bold" },
-				b = { bg = C.surface0, fg = C.green },
-			}
-
-			catppuccin.terminal = {
-				a = { bg = C.green, fg = C.base, gui = "bold" },
-				b = { bg = C.surface0, fg = C.green },
-			}
-
-			catppuccin.command = {
-				a = { bg = C.peach, fg = C.base, gui = "bold" },
-				b = { bg = C.surface0, fg = C.peach },
-			}
-
-			catppuccin.visual = {
-				a = { bg = C.mauve, fg = C.base, gui = "bold" },
-				b = { bg = C.surface0, fg = C.mauve },
-			}
-
-			catppuccin.replace = {
-				a = { bg = C.red, fg = C.base, gui = "bold" },
-				b = { bg = C.surface0, fg = C.red },
-			}
-
-			catppuccin.inactive = {
-				a = { bg = transparent_bg, fg = C.blue },
-				b = { bg = transparent_bg, fg = C.surface1, gui = "bold" },
-				c = { bg = transparent_bg, fg = C.overlay0 },
-			}
-
-			require("lualine").setup({
-				options = { theme = catppuccin },
-			})
+			-- local C = require("catppuccin.palettes").get_palette("Frappe")
+			-- local O = require("catppuccin").options
+			-- local catppuccin = {}
+			--
+			-- local transparent_bg = O.transparent_background and "NONE" or C.mantle
+			--
+			-- catppuccin.normal = {
+			-- 	a = { bg = C.blue, fg = C.mantle, gui = "bold" },
+			-- 	b = { bg = C.surface0, fg = C.blue },
+			-- 	c = { bg = transparent_bg, fg = C.text },
+			-- }
+			--
+			-- catppuccin.insert = {
+			-- 	a = { bg = C.green, fg = C.base, gui = "bold" },
+			-- 	b = { bg = C.surface0, fg = C.green },
+			-- }
+			--
+			-- catppuccin.terminal = {
+			-- 	a = { bg = C.green, fg = C.base, gui = "bold" },
+			-- 	b = { bg = C.surface0, fg = C.green },
+			-- }
+			--
+			-- catppuccin.command = {
+			-- 	a = { bg = C.peach, fg = C.base, gui = "bold" },
+			-- 	b = { bg = C.surface0, fg = C.peach },
+			-- }
+			--
+			-- catppuccin.visual = {
+			-- 	a = { bg = C.mauve, fg = C.base, gui = "bold" },
+			-- 	b = { bg = C.surface0, fg = C.mauve },
+			-- }
+			--
+			-- catppuccin.replace = {
+			-- 	a = { bg = C.red, fg = C.base, gui = "bold" },
+			-- 	b = { bg = C.surface0, fg = C.red },
+			-- }
+			--
+			-- catppuccin.inactive = {
+			-- 	a = { bg = transparent_bg, fg = C.blue },
+			-- 	b = { bg = transparent_bg, fg = C.surface1, gui = "bold" },
+			-- 	c = { bg = transparent_bg, fg = C.overlay0 },
+			-- }
+			--
+			-- require("lualine").setup({
+			-- 	options = { theme = catppuccin },
+			-- })
 		end,
 	},
 
@@ -1138,3 +1150,5 @@ vim.g.codeium_enabled = false
 vim.opt.laststatus = 3
 -- Open compiler
 vim.api.nvim_set_keymap("n", "<Leader>co", "<cmd>CompilerOpen<cr>", { noremap = true, silent = true })
+
+vim.cmd.colorscheme("nightfox")
