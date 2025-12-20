@@ -46,6 +46,7 @@ return {
         desc = "Search GitHub",
       },
     },
+
     dependencies = {
       "nvim-lua/plenary.nvim",
       "folke/snacks.nvim",

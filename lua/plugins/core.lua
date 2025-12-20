@@ -3,7 +3,6 @@ return {
   "tpope/vim-repeat",
   "tpope/vim-unimpaired",
   "tpope/vim-surround",
-  "psliwka/vim-smoothie",
 
   "matt-taggart/vim-js-debug",
   "matt-taggart/replace-in-buffer",
@@ -26,7 +25,6 @@ return {
   "sitiom/nvim-numbertoggle",
   "bullets-vim/bullets.vim",
   "norcalli/nvim-colorizer.lua",
-  "arnamak/stay-centered.nvim",
 
   {
     "nvim-mini/mini.nvim",
@@ -35,5 +33,9 @@ return {
     config = function()
       require("mini.files").setup({})
     end,
+  },
+  {
+    "karb94/neoscroll.nvim",
+    opts = {},
   },
 }

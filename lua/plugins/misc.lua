@@ -7,7 +7,7 @@ return {
     dependencies = { "nvim-lua/plenary.nvim" },
     config = function()
       require("obsidian").setup({
-        dir = "~/Documents/Matt's Vault",
+        dir = "~/Documents/Obsidian Vault",
       })
     end,
   },
