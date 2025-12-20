@@ -54,7 +54,6 @@ return {
         pyright = {},
         rust_analyzer = {},
         elixirls = {},
-        ocamllsp = {},
         svelte = {},
         ts_ls = {},
 
@@ -133,7 +132,6 @@ return {
         javascriptreact = { "prettier" },
         typescriptreact = { "prettier" },
         svelte = { "prettier" },
-        ocaml = { "ocamlformat" },
         elixir = { "mix" },
       },
     },
