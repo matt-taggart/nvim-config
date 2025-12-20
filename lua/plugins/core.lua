@@ -26,6 +26,7 @@ return {
   "sitiom/nvim-numbertoggle",
   "bullets-vim/bullets.vim",
   "norcalli/nvim-colorizer.lua",
+  "arnamak/stay-centered.nvim",
 
   {
     "nvim-mini/mini.nvim",
