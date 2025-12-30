@@ -1,6 +1,7 @@
 return {
   { "Mofiqul/dracula.nvim" },
   { "catppuccin/nvim", name = "catppuccin", priority = 1000 },
+  { "EdenEast/nightfox.nvim" },
 
   { "lukas-reineke/indent-blankline.nvim", main = "ibl", opts = {} },
 

@@ -41,6 +41,14 @@ return {
         end,
         desc = "Toggle Flash Search",
       },
+      {
+        "r",
+        mode = "o",
+        function()
+          require("flash").remote()
+        end,
+        desc = "Remote Flash",
+      },
     },
   },
 
@@ -76,5 +84,12 @@ return {
     config = function()
       require("grug-far").setup({})
     end,
+  },
+
+  {
+    "m4xshen/hardtime.nvim",
+    lazy = false,
+    dependencies = { "MunifTanjim/nui.nvim" },
+    opts = {},
   },
 }
